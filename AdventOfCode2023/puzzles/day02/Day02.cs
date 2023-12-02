@@ -13,6 +13,7 @@ namespace AdventOfCode2023.puzzles.day02
         public Day02()
         {
             part1();
+            part2();
         }
 
         public void part1()
@@ -22,8 +23,27 @@ namespace AdventOfCode2023.puzzles.day02
             var maxGreen = 13;
             var maxBlue = 14;
 
-            var lines = File.ReadAllLines(@"puzzles\day02\input1.txt");
+            var games = parseData(@"puzzles\day02\input1.txt");
             var sum = 0;
+            foreach(var game in games)
+            {
+                if (game.IsValid(maxRed, maxGreen, maxBlue))
+                {
+                    sum += game.id;
+                }
+            }
+            Console.WriteLine(sum);
+        }
+
+        public void part2()
+        {
+
+        }
+
+        public List<GameInfo> parseData(string inputfile)
+        {
+            var games = new List<GameInfo>();
+            var lines = File.ReadAllLines(inputfile);
             foreach (var line in lines)
             {
                 var gameInfo = new GameInfo();
@@ -38,17 +58,9 @@ namespace AdventOfCode2023.puzzles.day02
                     draw.blue = extractColoredBalls(lineDraw, "blue");
                     gameInfo.draws.Add(draw);
                 }
-                if (gameInfo.IsValid(maxRed, maxGreen, maxBlue))
-                {
-                    Console.WriteLine("Game " + gameInfo.id + " is valid");
-                    sum += gameInfo.id;
-                } else
-                {
-                    Console.WriteLine("Game " + gameInfo.id + " is invalid");
-
-                }
+                games.Add(gameInfo);
             }
-            Console.WriteLine(sum);
+            return games;
         }
 
         public int extractColoredBalls(string lineDraw, string color)
