@@ -12,18 +12,19 @@ namespace AdventOfCode2023.puzzles.day02
     {
         public Day02()
         {
-            part1();
-            part2();
+            var inputfile = @"puzzles\day02\input1.txt";
+            part1(inputfile);
+            part2(inputfile);
         }
 
-        public void part1()
+        public void part1(string inputfile)
         {
             //only 12 red cubes, 13 green cubes, and 14 blue cubes
             var maxRed = 12;
             var maxGreen = 13;
             var maxBlue = 14;
 
-            var games = parseData(@"puzzles\day02\input1.txt");
+            var games = parseData(inputfile);
             var sum = 0;
             foreach(var game in games)
             {
@@ -35,9 +36,19 @@ namespace AdventOfCode2023.puzzles.day02
             Console.WriteLine(sum);
         }
 
-        public void part2()
+        public void part2(string inputfile)
         {
-
+            var sum = 0;
+            var games = parseData(inputfile);
+            foreach(var game in games)
+            {
+                var maxRed = game.draws.Select(x => x.red).Max();
+                var maxGreen = game.draws.Select(x => x.green).Max();
+                var maxBlue = game.draws.Select(x => x.blue).Max();
+                var power = maxRed * maxGreen * maxBlue;
+                sum += power;
+            }
+            Console.WriteLine(sum);
         }
 
         public List<GameInfo> parseData(string inputfile)
