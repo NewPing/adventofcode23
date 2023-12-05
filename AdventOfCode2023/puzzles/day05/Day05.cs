@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -31,14 +30,57 @@ namespace AdventOfCode2023.puzzles.day05
             var maps = parseInput(contentParts);
             var seedNumbers = Regex.Matches(contentParts[0], @"\d+").Select(x => long.Parse(x.Value)).ToList();
             var seedRanges = new List<MRange>();
-            for (int i = 0; i < seedNumbers.Count -1; i+=2)
+            for (int i = 0; i < seedNumbers.Count - 1; i += 2)
             {
-                seeds.AddRange(ToRange(seedNumbers[i], seedNumbers[i + 1]));
+                seedRanges.Add(new MRange(seedNumbers[i], seedNumbers[i + 1]));
             }
+            for (int i = 0; i < maps.Count; i++)
+            {
+                for (int j = 0; j < seedRanges.Count; j++)
+                {
+                    MRange min = getNextLowestRange(seedRanges[j].SourceStartPos, maps[i]);
+                    //if no smaller value then no fitting mapping overall
+                    if (min.SourceStartPos == -1)
+                    {
+                        continue;
+                    }
+                    long cutoff = (min.SourceStartPos + min.RangeLength) - (seedRanges[j].SourceStartPos + seedRanges[j].RangeLength);
+                    //the SeedRange fits completely in the found mapping
+                    if (cutoff >= 0)
+                    {
+                        seedRanges[j].SourceStartPos = seedRanges[j].SourceStartPos + (min.DestinationStartPos - min.SourceStartPos);
+                        continue;
+                    }
+                    //no mapping fits
+                    if (Math.Abs(cutoff) >= seedRanges[j].RangeLength)
+                    {
+                        continue;
+                    }
+                    //the seedrange doesnt fit completely
+                    cutoff = Math.Abs(cutoff);
+                    //add leftoverrange first
+                    seedRanges.Add(new MRange(seedRanges[j].SourceStartPos + (seedRanges[j].RangeLength - cutoff), cutoff));
+                    //adjust rest
+                    seedRanges[j].SourceStartPos = seedRanges[j].SourceStartPos + (min.DestinationStartPos - min.SourceStartPos);
+                    seedRanges[j].RangeLength = seedRanges[j].RangeLength - cutoff;
 
-            var locationNumbers = SeedsToLocation(seeds, maps);
-            Console.WriteLine(locationNumbers.Min());
+                }
+            }
+            Console.WriteLine(seedRanges.Select(x => x.SourceStartPos).Min());
         }
+        MRange getNextLowestRange(long sourceStart, Map map)
+        {
+            MRange min = new MRange(-1, 1);
+            foreach (MRange range in map.Ranges)
+            {
+                if (range.SourceStartPos <= sourceStart && min.SourceStartPos < range.SourceStartPos)
+                {
+                    min = range;
+                }
+            }
+            return min;
+        }
+
 
         private List<long> ToRange(long start, long length)
         {
@@ -47,7 +89,7 @@ namespace AdventOfCode2023.puzzles.day05
             {
                 range.Add(start + i);
             }
-            Console.WriteLine(smallestLocation);
+            return range;
         }
 
         public List<long> SeedsToLocation(List<long> seeds, List<Map> maps)
@@ -63,16 +105,6 @@ namespace AdventOfCode2023.puzzles.day05
                 locationNumbers.Add(currentSource);
             }
             return locationNumbers;
-        }
-
-        public long SeedToLocation(long seed, List<Map> maps)
-        {
-            var currentSource = seed;
-            for (int i = 0; i < maps.Count; i++)
-            {
-                currentSource = maps[i].SourceToDest(currentSource);
-            }
-            return currentSource;
         }
 
         private List<Map> parseInput(string[] input)
@@ -95,17 +127,17 @@ namespace AdventOfCode2023.puzzles.day05
             }
             return maps;
         }
-        
+
 
     }
 
     class Map
     {
         public List<MRange> Ranges { get; set; } = new List<MRange>();
-        
+
         public long SourceToDest(long source)
         {
-            foreach(var range in Ranges)
+            foreach (var range in Ranges)
             {
                 if (range.IsInRange(source))
                 {
