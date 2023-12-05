@@ -29,15 +29,58 @@ namespace AdventOfCode2023.puzzles.day05
         {
             var maps = parseInput(contentParts);
             var seedNumbers = Regex.Matches(contentParts[0], @"\d+").Select(x => long.Parse(x.Value)).ToList();
-            var seeds = new List<long>();
+            var seedRanges = new List<MRange>();
             for (int i = 0; i < seedNumbers.Count -1; i+=2)
             {
-                seeds.AddRange(ToRange(seedNumbers[i], seedNumbers[i + 1]));
+                seedRanges.Add(new MRange(seedNumbers[i], seedNumbers[i + 1]));
             }
+            for(int i = 0;i < maps.Count;i++)
+            {
+                for (int j = 0; j < seedRanges.Count;j++)
+                {
+                    MRange min = getNextLowestRange(seedRanges[j].SourceStartPos, maps[i]);
+                    //if no smaller value then no fitting mapping overall
+                    if(min.SourceStartPos == -1)
+                    {
+                        continue;
+                    }
+                    long cutoff = (min.SourceStartPos + min.RangeLength) - (seedRanges[j].SourceStartPos + seedRanges[j].RangeLength);
+                    //the SeedRange fits completely in the found mapping
+                    if(cutoff >= 0)
+                    {
+                        seedRanges[j].SourceStartPos = seedRanges[j].SourceStartPos + (min.DestinationStartPos-min.SourceStartPos);
+                        continue;
+                    }
+                    //no mapping fits
+                    if(Math.Abs(cutoff) >= seedRanges[j].RangeLength)
+                    {
+                        continue;
+                    }
+                    //the seedrange doesnt fit completely
+                    cutoff = Math.Abs(cutoff);
+                    //add leftoverrange first
+                    seedRanges.Add(new MRange(seedRanges[j].SourceStartPos + (seedRanges[j].RangeLength - cutoff), cutoff));
+                    //adjust rest
+                    seedRanges[j].SourceStartPos = seedRanges[j].SourceStartPos + (min.DestinationStartPos - min.SourceStartPos);
+                    seedRanges[j].RangeLength = seedRanges[j].RangeLength - cutoff;
 
-            var locationNumbers = SeedsToLocation(seeds, maps);
-            Console.WriteLine(locationNumbers.Min());
+                }   
+            }
+            Console.WriteLine(seedRanges.Select(x => x.SourceStartPos).Min());
         }
+        MRange getNextLowestRange(long sourceStart, Map map)
+        {
+            MRange min = new MRange(-1,1);
+            foreach(MRange range in map.Ranges)
+            {
+                if(range.SourceStartPos <= sourceStart && min.SourceStartPos < range.SourceStartPos )
+                {
+                    min = range;
+                }
+            }
+            return min;
+        }
+
 
         private List<long> ToRange(long start, long length)
         {
@@ -84,6 +127,7 @@ namespace AdventOfCode2023.puzzles.day05
             }
             return maps;
         }
+        
 
     }
 
@@ -109,7 +153,12 @@ namespace AdventOfCode2023.puzzles.day05
         public long DestinationStartPos { get; set; }
         public long SourceStartPos { get; set; }
         public long RangeLength { get; set; }
-
+        public MRange() { }
+        public MRange(long sourceStart, long lenght)
+        {
+            this.SourceStartPos = sourceStart;
+            this.RangeLength = lenght;
+        }
         public bool IsInRange(long source)
         {
             return SourceStartPos <= source && source <= SourceStartPos + RangeLength;
