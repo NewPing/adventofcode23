@@ -30,20 +30,22 @@ namespace AdventOfCode2023.puzzles.day05
         {
             var maps = parseInput(contentParts);
             var seedNumbers = Regex.Matches(contentParts[0], @"\d+").Select(x => long.Parse(x.Value)).ToList();
-
-            var smallestLocation = long.MaxValue;
-            for (int i = 0; i < seedNumbers.Count - 1; i += 2)
+            var seedRanges = new List<MRange>();
+            for (int i = 0; i < seedNumbers.Count -1; i+=2)
             {
-                Console.WriteLine("now working on seed " + i + " with a range of " + seedNumbers[i+1] + " seeds.");
-                for (long s = seedNumbers[i]; s <= seedNumbers[i] + seedNumbers[i + 1]; s++)
-                {
-                    var location = SeedToLocation(s, maps);
-                    if (smallestLocation > location)
-                    {
-                        Console.WriteLine("Setting new smallest location value to " + location);
-                        smallestLocation = location;
-                    }
-                }
+                seeds.AddRange(ToRange(seedNumbers[i], seedNumbers[i + 1]));
+            }
+
+            var locationNumbers = SeedsToLocation(seeds, maps);
+            Console.WriteLine(locationNumbers.Min());
+        }
+
+        private List<long> ToRange(long start, long length)
+        {
+            var range = new List<long>();
+            for (long i = 0; i < length; i++)
+            {
+                range.Add(start + i);
             }
             Console.WriteLine(smallestLocation);
         }
@@ -93,6 +95,7 @@ namespace AdventOfCode2023.puzzles.day05
             }
             return maps;
         }
+        
 
     }
 
@@ -118,7 +121,12 @@ namespace AdventOfCode2023.puzzles.day05
         public long DestinationStartPos { get; set; }
         public long SourceStartPos { get; set; }
         public long RangeLength { get; set; }
-
+        public MRange() { }
+        public MRange(long sourceStart, long lenght)
+        {
+            this.SourceStartPos = sourceStart;
+            this.RangeLength = lenght;
+        }
         public bool IsInRange(long source)
         {
             return SourceStartPos <= source && source <= SourceStartPos + RangeLength;
