@@ -13,14 +13,64 @@ namespace AdventOfCode2023.puzzles.day05
         {
             var content = File.ReadAllText(@"puzzles\day05\input1.txt").Replace("\r\n", "\n");
             var contentParts = content.Split("\n\n");
-            
-            var seeds = Regex.Matches(contentParts[0], @"\d+").Select(x => long.Parse(x.Value)).ToList();
+            //part1(contentParts);
+            part2(contentParts);
+        }
 
+        private void part1(string[] contentParts)
+        {
+            var maps = parseInput(contentParts);
+            var seeds = Regex.Matches(contentParts[0], @"\d+").Select(x => long.Parse(x.Value)).ToList();
+            var locationNumbers = SeedsToLocation(seeds, maps);
+            Console.WriteLine(locationNumbers.Min());
+        }
+
+        private void part2(string[] contentParts)
+        {
+            var maps = parseInput(contentParts);
+            var seedNumbers = Regex.Matches(contentParts[0], @"\d+").Select(x => long.Parse(x.Value)).ToList();
+            var seeds = new List<long>();
+            for (int i = 0; i < seedNumbers.Count -1; i+=2)
+            {
+                seeds.AddRange(ToRange(seedNumbers[i], seedNumbers[i + 1]));
+            }
+
+            var locationNumbers = SeedsToLocation(seeds, maps);
+            Console.WriteLine(locationNumbers.Min());
+        }
+
+        private List<long> ToRange(long start, long length)
+        {
+            var range = new List<long>();
+            for (long i = 0; i < length; i++)
+            {
+                range.Add(start + i);
+            }
+            return range;
+        }
+
+        public List<long> SeedsToLocation(List<long> seeds, List<Map> maps)
+        {
+            var locationNumbers = new List<long>();
+            foreach (var seed in seeds)
+            {
+                var currentSource = seed;
+                for (int i = 0; i < maps.Count; i++)
+                {
+                    currentSource = maps[i].SourceToDest(currentSource);
+                }
+                locationNumbers.Add(currentSource);
+            }
+            return locationNumbers;
+        }
+
+        private List<Map> parseInput(string[] input)
+        {
             var maps = new List<Map>();
-            for (long i = 1; i < contentParts.Length; i++)
+            for (long i = 1; i < input.Length; i++)
             {
                 var map = new Map();
-                var partLines = contentParts[i].Split("\n");
+                var partLines = input[i].Split("\n");
                 for (long j = 1; j < partLines.Length; j++)
                 {
                     var sections = Regex.Matches(partLines[j], @"\d+").Select(x => long.Parse(x.Value)).ToList();
@@ -32,18 +82,7 @@ namespace AdventOfCode2023.puzzles.day05
                 }
                 maps.Add(map);
             }
-
-            var locationNumbers = new List<long>();
-            foreach (var seed in seeds)
-            {
-                var currentSource = seed;
-                for (int i = 0; i < maps.Count; i++)
-                {
-                    currentSource = maps[i].SourceToDest(currentSource);
-                }
-                locationNumbers.Add(currentSource);
-            }
-            Console.WriteLine(locationNumbers.Min());
+            return maps;
         }
 
     }
