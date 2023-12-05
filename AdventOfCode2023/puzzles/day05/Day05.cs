@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -29,24 +30,22 @@ namespace AdventOfCode2023.puzzles.day05
         {
             var maps = parseInput(contentParts);
             var seedNumbers = Regex.Matches(contentParts[0], @"\d+").Select(x => long.Parse(x.Value)).ToList();
-            var seeds = new List<long>();
-            for (int i = 0; i < seedNumbers.Count -1; i+=2)
-            {
-                seeds.AddRange(ToRange(seedNumbers[i], seedNumbers[i + 1]));
-            }
 
-            var locationNumbers = SeedsToLocation(seeds, maps);
-            Console.WriteLine(locationNumbers.Min());
-        }
-
-        private List<long> ToRange(long start, long length)
-        {
-            var range = new List<long>();
-            for (long i = 0; i < length; i++)
+            var smallestLocation = long.MaxValue;
+            for (int i = 0; i < seedNumbers.Count - 1; i += 2)
             {
-                range.Add(start + i);
+                Console.WriteLine("now working on seed " + i + " with a range of " + seedNumbers[i+1] + " seeds.");
+                for (long s = seedNumbers[i]; s <= seedNumbers[i] + seedNumbers[i + 1]; s++)
+                {
+                    var location = SeedToLocation(s, maps);
+                    if (smallestLocation > location)
+                    {
+                        Console.WriteLine("Setting new smallest location value to " + location);
+                        smallestLocation = location;
+                    }
+                }
             }
-            return range;
+            Console.WriteLine(smallestLocation);
         }
 
         public List<long> SeedsToLocation(List<long> seeds, List<Map> maps)
@@ -62,6 +61,16 @@ namespace AdventOfCode2023.puzzles.day05
                 locationNumbers.Add(currentSource);
             }
             return locationNumbers;
+        }
+
+        public long SeedToLocation(long seed, List<Map> maps)
+        {
+            var currentSource = seed;
+            for (int i = 0; i < maps.Count; i++)
+            {
+                currentSource = maps[i].SourceToDest(currentSource);
+            }
+            return currentSource;
         }
 
         private List<Map> parseInput(string[] input)
