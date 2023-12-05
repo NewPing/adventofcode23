@@ -1,5 +1,6 @@
 ﻿using AdventOfCode2023.puzzles.day01;
 using AdventOfCode2023.puzzles.day02;
+using AdventOfCode2023.puzzles.day03;
 
 namespace AdventOfCode2023
 {
@@ -9,7 +10,8 @@ namespace AdventOfCode2023
         {
             Console.WriteLine("-< Advent of Code 2023 >-");
             //new Day01();
-            new Day02();
+            //new Day02();
+            new Day03();
         }
     }
 }
