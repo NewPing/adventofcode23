@@ -13,7 +13,7 @@ namespace AdventOfCode2023.puzzles.day04
     {
         public Day04()
         {
-            var lines = File.ReadAllLines(@"puzzles\day04\exampleInput.txt").ToList();
+            var lines = File.ReadAllLines(@"puzzles\day04\input1.txt").ToList();
             var cards = parseInput(lines);
             //part1(cards);
             part2(cards);
@@ -39,10 +39,6 @@ namespace AdventOfCode2023.puzzles.day04
                     cards[i].Amount += card.Amount;
                 }
             }
-            foreach(var card in cards)
-            {
-                Console.WriteLine("Card: " + card.ID + ": Amount: " + card.Amount + " Wins: " + card.WinningNumbers.Intersect(card.DrawnNumbers).Count());
-            }
             Console.WriteLine(cards.Select(x => x.Amount).Sum());
         }
 
@@ -54,7 +50,7 @@ namespace AdventOfCode2023.puzzles.day04
                 var card = new Card();
                 var lineparts = line.Split(new char[] { ':', '|' }); //front with line id; middle with winning numbers; back with drawn numbers
 
-                card.ID = int.Parse(Regex.Match(lineparts[0], @"(?<=Card *)\d").Value);
+                card.ID = int.Parse(Regex.Match(lineparts[0], @"(?<=Card *)\d+").Value);
                 card.WinningNumbers = Regex.Matches(lineparts[1], @"\d+").Select(x => int.Parse(x.Value)).ToList();
                 card.DrawnNumbers = Regex.Matches(lineparts[2], @"\d+").Select(x => int.Parse(x.Value)).ToList();
                 cards.Add(card);
