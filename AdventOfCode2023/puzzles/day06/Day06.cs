@@ -14,6 +14,7 @@ namespace AdventOfCode2023.puzzles.day06
         {
             var lines = File.ReadAllLines(@"puzzles\day06\input1.txt");
             part1(lines);
+            part2(lines);
         }
 
         private void part1(string[] lines)
@@ -45,6 +46,23 @@ namespace AdventOfCode2023.puzzles.day06
                 output *= possibleWins;
             }
             Console.WriteLine(output);
+        }
+
+        private void part2(string[] lines)
+        {
+            var time = long.Parse(Regex.Match(lines[0].Replace(" ", ""), @"\d+").Value);
+            var distance = long.Parse(Regex.Match(lines[1].Replace(" ", ""), @"\d+").Value);
+
+            var possibleWins = 0;
+            for (int i = 0; i < time; i++)
+            {
+                var reachedDistance = i * (time - i);
+                if (reachedDistance > distance)
+                {
+                    possibleWins++;
+                }
+            }
+            Console.WriteLine(possibleWins);
         }
     }
 
