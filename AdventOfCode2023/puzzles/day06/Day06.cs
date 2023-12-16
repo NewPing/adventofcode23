@@ -13,6 +13,11 @@ namespace AdventOfCode2023.puzzles.day06
         public Day06()
         {
             var lines = File.ReadAllLines(@"puzzles\day06\input1.txt");
+            part1(lines);
+        }
+
+        private void part1(string[] lines)
+        {
             var times = Regex.Matches(lines[0], @"\d+").Select(x => int.Parse(x.Value)).ToList();
             var distances = Regex.Matches(lines[1], @"\d+").Select(x => int.Parse(x.Value)).ToList();
 
@@ -25,13 +30,6 @@ namespace AdventOfCode2023.puzzles.day06
                 raceEntries.Add(raceEntry);
             }
 
-            int output;
-            output = part1(raceEntries);
-            Console.WriteLine(output);
-        }
-
-        private int part1(List<RaceEntry> raceEntries)
-        {
             var output = 1;
             foreach(var raceEntry in raceEntries)
             {
@@ -46,7 +44,7 @@ namespace AdventOfCode2023.puzzles.day06
                 }
                 output *= possibleWins;
             }
-            return output;
+            Console.WriteLine(output);
         }
     }
 
